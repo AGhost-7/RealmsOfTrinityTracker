@@ -1,0 +1,1 @@
+This is nothing more than a scrapper which runs every 20 minutes. Used to track player activity at realmsoftrinity.com.
