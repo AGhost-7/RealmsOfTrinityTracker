@@ -8,8 +8,13 @@ import scala.util.Either
 import aghost7.scriptly._
 import anorm._
 
-case class Snapshot(accountName: String, charName: String, 
-		level:String, mode: String, area:String, epithet: Option[String] = None) {
+case class Snapshot(
+		accountName: String, 
+		charName: String, 
+		level:String, 
+		mode: String, 
+		area:String, 
+		epithet: Option[String] = None) {
 
 	override def toString = 
 		s"""Account name: $accountName
@@ -18,7 +23,6 @@ case class Snapshot(accountName: String, charName: String,
 			|Mode: $mode
 			|Area: $area
 			|Epithet: $epithet""".stripMargin
-	
 }
 
 case class Error(message: String)
@@ -26,7 +30,7 @@ case class Error(message: String)
 object Main extends App {
 	
 	val delay = 60 * 1000 * 20
-	val uri = "jdbc:postgresql://localhost/realmsoftrinitytracker?user=postgres&password=650153135hW426"
+	val uri = "jdbc:postgresql://localhost:5432/realmsoftrinitytracker?user=postgres&password=650153135hW426"
 	val sqlCon = SqlConnection(uri) _
 	val writer = Writer("exceptions.txt") _
 	
@@ -44,18 +48,14 @@ object Main extends App {
 		.map { htmlPattern.replaceAllIn(_, "") }
 		.filter { _.trim != "" }
 		
-	def deciferLine(line: String): Either[Snapshot, Error] =
-		noDonation.findFirstIn(line) match {
-				case Some(noDonation(accountName, _, charName, _, level, _, mode, _, area, _)) =>	
-					Left(Snapshot(accountName, charName, level, mode, area))
-				case None => 
-					withDonation.findFirstIn(line) match {
-						case Some(withDonation(accountName, _, epithet, _, charName, _, level, _, mode, _, area, _)) =>
-							Left(Snapshot(accountName, charName, level.trim, mode, area, Some(epithet)))
-						case None =>
-							Right(Error(line))
-					}
-			}
+	def deciferLine(line: String): Either[Snapshot, Error] = line match {
+		case noDonation(accountName, _, charName, _, level, _, mode, _, area, _) =>
+			Left(Snapshot(accountName, charName, level, mode, area))
+		case withDonation(accountName, _, epithet, _, charName, _, level, _, mode, _, area, _) =>
+			Left(Snapshot(accountName, charName, level.trim, mode, area, Some(epithet)))
+		case _ =>
+			Right(Error(line))
+	}
 	
 	def insertSnapshots(snapshots: Traversable[Snapshot])(implicit con: Connection): Unit =
 		if(!snapshots.isEmpty){
@@ -104,11 +104,12 @@ object Main extends App {
 		} catch {
 			case err: Throwable => 
 				err.printStackTrace()
-				writer { put => put(err.toString) }
+				writer { put => put(err) }
 		}	finally {
 			Thread.sleep(delay)
 			mainLoop
 		}
+		
 	}
 	
 	mainLoop
