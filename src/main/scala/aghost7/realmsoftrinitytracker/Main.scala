@@ -1,6 +1,7 @@
 package aghost7.realmsoftrinitytracker
 
 import java.sql.Connection
+import java.sql.Timestamp
 
 import scala.io.Source
 import scala.util.Either
@@ -8,24 +9,9 @@ import scala.util.Either
 import aghost7.scriptly._
 import anorm._
 
-case class Snapshot(
-		accountName: String, 
-		charName: String, 
-		level:String, 
-		mode: String, 
-		area:String, 
-		epithet: Option[String] = None) {
+import AnormSerializers._
 
-	override def toString = 
-		s"""Account name: $accountName
-			|Character name: $charName
-			|Level: $level
-			|Mode: $mode
-			|Area: $area
-			|Epithet: $epithet""".stripMargin
-}
 
-case class Error(message: String)
 
 object Main extends App {
 	
@@ -36,9 +22,11 @@ object Main extends App {
 	
 	val htmlPattern = """<([a-z\/][^<>]+[a-z"'\/]|[\/]?[a-z])>""".r
 	
-	val noDonation = """^([A-z0-9_ -]+)([ ]{1,2}-[ ]{1,2})([A-z0-9-_ ,]+)(,[ ]+)(.+)([ ]+<[ ]+)([A-z ]*)([ ]+>[ ]+\([ ]+)(.+)(\))$""".r
-	val withDonation = """^([A-z0-9_ -]+)([ ]{0,1}\([ ]+)(.+)([ ]+\)[ ]+)([A-z0-9-_ ,]+)(,[ ]+)(.+)([ ]+<[ ]+)([A-z ]*)([ ]+>[ ]+\([ ]+)(.+)(\))$""".r
+	val noDonation = """^([A-z0-9_ -]+)([ ]{1,2}-[ ]{1,2})([A-z0-9-_ ,']+)(,[ ]+)(.+)([ ]+<[ ]+)([A-z ]*)([ ]+>[ ]+\([ ]+)(.+)(\))$""".r
+	val withDonation = """^([A-z0-9_ -]+)([ ]{0,1}\([ ]+)(.+)([ ]+\)[ ]+)([A-z0-9-_ ,']+)(,[ ]+)(.+)([ ]+<[ ]+)([A-z ]*)([ ]+>[ ]+\([ ]+)(.+)(\))$""".r
+	val dungeonMaster = """^(< Dungeon Master > *[(] *)([A-z -]+)( *[)] *)(.+)( *[-] *)([A-z0-9-_ ,']+)( *< *)([A-z ]*)( *> *)$""".r
 	
+	/** Fetches the lines needed for processing and strips out the html tags. */
 	def getLines: Iterator[String] = Source
 		.fromURL("http://www.realmsoftrinity.com/PlayersOnline.aspx")
 		.getLines
@@ -47,43 +35,39 @@ object Main extends App {
 		.takeWhile { !_.contains("<h3>Epic Relevel Honors</h3>") }
 		.map { htmlPattern.replaceAllIn(_, "") }
 		.filter { _.trim != "" }
-		
+	
+	/** Returns an instance of either a Snapshot or Error entry for the database
+	 *  based on the regex matches.
+	 */
 	def deciferLine(line: String): Either[Snapshot, Error] = line match {
 		case noDonation(accountName, _, charName, _, level, _, mode, _, area, _) =>
-			Left(Snapshot(accountName, charName, level, mode, area))
+			Left(Snapshot(
+				accountName.trim, 
+				charName.trim, 
+				level.trim, 
+				mode.trim, 
+				area.trim))
 		case withDonation(accountName, _, epithet, _, charName, _, level, _, mode, _, area, _) =>
-			Left(Snapshot(accountName, charName, level.trim, mode, area, Some(epithet)))
+			Left(Snapshot(
+				accountName.trim, 
+				charName.trim, 
+				level.trim, 
+				mode.trim, 
+				area.trim, 
+				Some(epithet.trim)))
+		case dungeonMaster(_, epithet, _, accountName, _, charName, _, mode, _) =>
+			Left(Snapshot(
+				accountName.trim, 
+				charName.trim, 
+				"**DM Hidden**", 
+				mode.trim, 
+				"**DM Hidden**",
+				Some(epithet.trim)))
 		case _ =>
 			Right(Error(line))
 	}
 	
-	def insertSnapshots(snapshots: Traversable[Snapshot])(implicit con: Connection): Unit =
-		if(!snapshots.isEmpty){
-			val sqlSnp = SQL("""
-					INSERT INTO snapshots(account_name, char_name, "level", "mode", area, epithet)
-					VALUES({account_name}, {char_name}, {level}, {mode}, {area}, {epithet})
-				""")
-				
-			snapshots.foldLeft(sqlSnp.asBatch) { (accu, snp)=>
-				accu.addBatchParams(
-						snp.accountName, 
-						snp.charName, 
-						snp.level, 
-						snp.mode,
-						snp.area,
-						snp.epithet)
-			}.execute()
-		}
-	
-	def insertErrors(errors: Traversable[Error])(implicit con: Connection): Unit =
-		if(!errors.isEmpty){
-			val sqlErr = SQL("INSERT INTO errors(message) VALUES ({msg})")
-			
-			errors.foldLeft(sqlErr.asBatch) { (batch, err) =>
-				batch.addBatchParams(err.message)
-			}.execute
-		}
-	
+	/** This is the loop responsible for fetching the data every 20 minutes. */
 	def mainLoop: Unit = {
 		try {
 			val (snapshots, errors) = getLines
@@ -97,8 +81,8 @@ object Main extends App {
 					}
 			
 			sqlCon { implicit con =>
-				insertSnapshots(snapshots)
-				insertErrors(errors)
+				Snapshot.insertBatch(snapshots)
+				Error.insertBatch(errors)
 			}
 			
 		} catch {
@@ -112,6 +96,32 @@ object Main extends App {
 		
 	}
 	
-	mainLoop
+	/** Goes through all errors and runs them through the updated deciferLine 
+	 *  method. Deletes the error entry and inserts the corrected snapshot.
+	 */
+	def patchDatabase: Unit = {
+		sqlCon { implicit cont =>
+			type StampedSnapshots = List[(Timestamp, Snapshot)]
+			val (snapshots, delete) = 
+				SQL("SELECT * FROM errors")()
+					.foldLeft[(StampedSnapshots, List[Int])]((Nil, Nil)) { 
+						case((snapshots, delete), row) =>
+							deciferLine(row[String]("message")) match {
+								case Left(snp) => 
+									val id = row[Int]("id")
+									val stamp = row[Timestamp]("stamp")
+									((stamp, snp) :: snapshots, id :: delete)
+								case Right(err) => (snapshots, delete)
+							}
+					}
+			//println("fixed " + delete.length)
+			
+			Snapshot.insertBatchWithTimestamp(snapshots)
+			Error.deleteBatch(delete)
+			
+		}
+	}
 	
+	mainLoop
+	//patchDatabase
 }
