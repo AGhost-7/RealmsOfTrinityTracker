@@ -16,3 +16,7 @@ CREATE TABLE errors(
 	message TEXT NOT NULL,
 	stamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TABLE account_watch(
+	account_name TEXT UNIQUE
+);
