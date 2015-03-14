@@ -12,3 +12,7 @@ libraryDependencies ++= Seq(
 assemblyJarName in assembly := "RealmsOfTrinityTracker.jar"
 
 mainClass := Some("aghost7.realmsoftrinitytracker.Main")
+
+fork in run := true
+
+connectInput in run := true

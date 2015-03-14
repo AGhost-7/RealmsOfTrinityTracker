@@ -3,6 +3,7 @@
   <classpathentry output="target\scala-2.11\classes" kind="src" path="src\main\java"/>
   <classpathentry output="target\scala-2.11\test-classes" kind="src" path="src\test\scala"/>
   <classpathentry output="target\scala-2.11\test-classes" kind="src" path="src\test\java"/>
+  <classpathentry kind="lib" path=".\lib\bebop-event_2.11-0.1.jar"/>
   <classpathentry kind="lib" path=".\lib\scriptly_2.11-0.1.jar"/>
   <classpathentry kind="con" path="org.scala-ide.sdt.launching.SCALA_CONTAINER"/>
   <classpathentry kind="lib" path="C:\Users\Jonathan\.ivy2\cache\postgresql\postgresql\jars\postgresql-9.1-901.jdbc4.jar"/>

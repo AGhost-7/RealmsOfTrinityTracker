@@ -97,6 +97,8 @@ object Tracker extends Runnable {
 			mainLoop(snapshots)
 			
 		} catch {
+			case _: InterruptedException =>
+				// do nothing I guess...
 			case err: Throwable => 
 				err.printStackTrace()
 				writer { put => put(err) }

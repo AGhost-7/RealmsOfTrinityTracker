@@ -1,33 +1,42 @@
 package aghost7.realmsoftrinitytracker
 
-import java.awt.event._
 import java.awt.{CheckboxMenuItem => Checkbox, MenuItem, PopupMenu, TrayIcon}
-
+import java.awt.event.ItemEvent
 import javax.swing._
-import java.awt.SystemTray
 
-import aghost7.scriptly._
+import java.awt.SystemTray
+import aghost7.bebop.event.implicits._
 
 import globals._
 
-object ControlBar extends ItemListener with ActionListener {
-	val writer = Writer("exceptions.txt") _
+object ControlBar {
+	
 	var notifyEnabled = true
 	lazy val tray = SystemTray.getSystemTray
 	
 	lazy val notif = new Checkbox("Notify", true)
-	lazy val close = new MenuItem("Close")
-	lazy val popup = new PopupMenu()
-	lazy val trayIcon = new TrayIcon(null, appName, popup)
+	lazy val close = new MenuItem("Close") 
+	
+	lazy val popup = new PopupMenu() {
+		add(notif)
+		addSeparator()
+		add(close)
+	}
+	
+	lazy val img = 
+		new ImageIcon(getClass.getResource("/icon.png")).getImage
+	lazy val trayIcon = new TrayIcon(img, appName, popup)
 	
 	if(SystemTray.isSupported()){
 		
-		notif.addItemListener(this)
-		close.addActionListener(this)
+		notif.onItemStateChanged { ev => 
+			notifyEnabled = ev.getStateChange() == ItemEvent.SELECTED
+		}
 		
-		popup.add(notif)
-		popup.addSeparator()
-		popup.add(close)
+		close.onActionPerformed { _ => 
+			Tracker.thread.interrupt()
+			System.exit(0)
+		}
 		
 		tray.add(trayIcon)
 	} else {
@@ -35,14 +44,6 @@ object ControlBar extends ItemListener with ActionListener {
 			put("---System tray control not supported---")
 		}
 		System.exit(1)
-	}
-	
-	def actionPerformed(e : ActionEvent): Unit = {
-		System.exit(0)
-	}
-	
-	def itemStateChanged(ev: ItemEvent): Unit = {
-		notifyEnabled = ev.getStateChange() == ItemEvent.SELECTED
 	}
 	
 	def notify(title: String, message: String): Unit = {
