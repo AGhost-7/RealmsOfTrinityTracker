@@ -66,7 +66,10 @@ object Tracker extends Runnable {
 		
 		val watches = SQL("SELECT account_name FROM account_watch")()
 					.map { _[String]("account_name") }
-		val matches = snapshots.filter { watches.contains(_) }
+		
+		val matches = snapshots
+				.map { _.accountName }
+				.filter { watches.contains(_) }
 		
 		if(!matches.isEmpty){
 			val list = matches.map { " - " +_ }.mkString("\n")

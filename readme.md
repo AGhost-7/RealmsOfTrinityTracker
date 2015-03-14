@@ -1,1 +1,6 @@
-This is nothing more than a scrapper which runs every 20 minutes. Used to track player activity at realmsoftrinity.com.
+This is nothing more than a scrapper which runs every 20 minutes. Used to track player 
+activity at realmsoftrinity.com.
+
+## Todo
+* Add activity logging.
+* Add account table, containing last_login, and first_login.

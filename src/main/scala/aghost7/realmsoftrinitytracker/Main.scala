@@ -41,9 +41,12 @@ object Main extends App {
 		}
 	}
 	
-	Tracker.thread.start
-	// Since its lazily initialized...
-	ControlBar
-	println("Initialized!")
+	Loadscreen.animate { 
+		Tracker.thread.start
+		// Since its lazily initialized...
+		ControlBar 
+		println("Initialized!")
+	}
+
 	//patchDatabase
 }
