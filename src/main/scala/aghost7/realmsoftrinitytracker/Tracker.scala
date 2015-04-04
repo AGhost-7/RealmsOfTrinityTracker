@@ -10,9 +10,17 @@ object Tracker extends Runnable {
 	
 	val htmlPattern = """<([a-z\/][^<>]+[a-z"'\/]|[\/]?[a-z])>""".r
 	
-	val noDonation = """^([A-z0-9_ -]+)([ ]{1,2}-[ ]{1,2})([A-z0-9-_ ,']+)(,[ ]+)(.+)([ ]+<[ ]+)([A-z ]*)([ ]+>[ ]+\([ ]+)(.+)(\))$""".r
-	val withDonation = """^([A-z0-9_ -]+)([ ]{0,1}\([ ]+)(.+)([ ]+\)[ ]+)([A-z0-9-_ ,']+)(,[ ]+)(.+)([ ]+<[ ]+)([A-z ]*)([ ]+>[ ]+\([ ]+)(.+)(\))$""".r
-	val dungeonMaster = """^(< Dungeon Master > *[(] *)([A-z -]+)( *[)] *)(.+)( *[-] *)([A-z0-9-_ ,']+)( *< *)([A-z ]*)( *> *)$""".r
+	val rgCharName = """([A-z0-9-_ ,'&]+)"""
+	val rgAccName = """([A-z0-9-_ ,'&]+)"""
+	val rgArea = """([A-z 0-9-&'.]+)"""
+	val rgLevel = """([ER0-9 ]+)"""
+	val rgMode = """([A-z, ]*)"""
+	val rgDonation = """([A-z -]+)"""	
+	
+	val rgNoDonation = s"""$rgAccName([ ]{1,2}-[ ]{1,2})$rgCharName(,[ ]+)$rgLevel([ ]+<[ ]+)$rgMode([ ]+>[ ]+\\([ ]+)$rgArea(\\))""".r
+	val rgWithDonation = s"""${rgAccName}([ ]*\\([ ]*)${rgDonation}([ ]*\\)[ ]*)${rgCharName}(,[ ]+)${rgLevel}([ ]+<[ ]+)${rgMode}([ ]+>[ ]+\\([ ]+)${rgArea}(\\))""".r
+	//writer { _(rgWithDonation.toString())}
+	val rgDungeonMaster = """^(< Dungeon Master > *[(] *)([A-z -]+)( *[)] *)(.+)( *[-] *)([A-z0-9-_ ,']+)( *< *)([A-z ]*)( *> *)$""".r
 	
 	val thread = new Thread(this)
 	
@@ -30,14 +38,14 @@ object Tracker extends Runnable {
 	 *  based on the regex matches.
 	 */
 	def deciferLine(line: String): Either[Snapshot, Error] = line match {
-		case noDonation(accountName, _, charName, _, level, _, mode, _, area, _) =>
+		case rgNoDonation(accountName, _, charName, _, level, _, mode, _, area, _) =>
 			Left(Snapshot(
 				accountName.trim, 
 				charName.trim, 
 				level.trim, 
 				mode.trim, 
 				area.trim))
-		case withDonation(accountName, _, epithet, _, charName, _, level, _, mode, _, area, _) =>
+		case rgWithDonation(accountName, _, epithet, _, charName, _, level, _, mode, _, area, _) =>
 			Left(Snapshot(
 				accountName.trim, 
 				charName.trim, 
@@ -45,7 +53,7 @@ object Tracker extends Runnable {
 				mode.trim, 
 				area.trim, 
 				Some(epithet.trim)))
-		case dungeonMaster(_, epithet, _, accountName, _, charName, _, mode, _) =>
+		case rgDungeonMaster(_, epithet, _, accountName, _, charName, _, mode, _) =>
 			Left(Snapshot(
 				accountName.trim, 
 				charName.trim, 

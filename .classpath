@@ -9,6 +9,8 @@
   <classpathentry kind="lib" path="C:\Users\Jonathan\.ivy2\cache\postgresql\postgresql\jars\postgresql-9.1-901.jdbc4.jar"/>
   <classpathentry kind="lib" path="C:\Users\Jonathan\.ivy2\cache\com.typesafe.play\anorm_2.11\jars\anorm_2.11-2.3.6.jar"/>
   <classpathentry kind="lib" path="C:\Users\Jonathan\.ivy2\cache\org.scala-lang.modules\scala-parser-combinators_2.11\bundles\scala-parser-combinators_2.11-1.0.1.jar"/>
+  <classpathentry kind="lib" path="C:\Users\Jonathan\.ivy2\cache\org.scalatest\scalatest_2.11\bundles\scalatest_2.11-2.2.1.jar"/>
+  <classpathentry kind="lib" path="C:\Users\Jonathan\.ivy2\cache\org.scala-lang.modules\scala-xml_2.11\bundles\scala-xml_2.11-1.0.2.jar"/>
   <classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
   <classpathentry kind="output" path="bin"/>
 </classpath>

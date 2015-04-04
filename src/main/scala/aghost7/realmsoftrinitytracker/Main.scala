@@ -33,7 +33,7 @@ object Main extends App {
 								case Right(err) => (snapshots, delete)
 							}
 					}
-			//println("fixed " + delete.length)
+			println("fixed " + delete.length)
 			
 			Snapshot.insertBatchWithTimestamp(snapshots)
 			Error.deleteBatch(delete)
