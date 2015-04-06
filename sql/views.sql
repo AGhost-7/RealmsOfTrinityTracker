@@ -62,3 +62,8 @@ CREATE OR REPLACE VIEW "Tracked Guild Account Activity (Today)" AS
 	FROM "Activity (Today)"
 		WHERE is_tracked_guild(area)
 		ORDER BY account_name;
+		
+CREATE OR REPLACE VIEW "First/Last Login" AS
+	SELECT account_name, min(stamp) AS "First Login", max(stamp) AS "Last Login" 
+	FROM snapshots 
+	GROUP BY account_name;
