@@ -19,7 +19,6 @@ object Tracker extends Runnable {
 	
 	val rgNoDonation = s"""$rgAccName([ ]{1,2}-[ ]{1,2})$rgCharName(,[ ]+)$rgLevel([ ]+<[ ]+)$rgMode([ ]+>[ ]+\\([ ]+)$rgArea(\\))""".r
 	val rgWithDonation = s"""${rgAccName}([ ]*\\([ ]*)${rgDonation}([ ]*\\)[ ]*)${rgCharName}(,[ ]+)${rgLevel}([ ]+<[ ]+)${rgMode}([ ]+>[ ]+\\([ ]+)${rgArea}(\\))""".r
-	//writer { _(rgWithDonation.toString())}
 	val rgDungeonMaster = """^(< Dungeon Master > *[(] *)([A-z -]+)( *[)] *)(.+)( *[-] *)([A-z0-9-_ ,']+)( *< *)([A-z ]*)( *> *)$""".r
 	
 	val thread = new Thread(this)
@@ -70,14 +69,24 @@ object Tracker extends Runnable {
 			snapshots: Traversable[Snapshot], 
 			lastSnapshots: Traversable[Snapshot])
 			(implicit con: Connection): Unit = {
-		import javax.swing._
 		
 		val watches = SQL("SELECT account_name FROM account_watch")()
 					.map { _[String]("account_name") }
 		
 		val matches = snapshots
+				.filter { snp =>
+					if(snp.mode.contains("AFK")) 
+						false
+					else if(watches.contains(snp.accountName))
+						lastSnapshots
+							.find { _.accountName == snp.accountName }
+							.map { _.area != snp.area }
+							.getOrElse(false)
+					else
+						false
+				}
 				.map { _.accountName }
-				.filter { watches.contains(_) }
+		
 		
 		if(!matches.isEmpty){
 			val list = matches.map { " - " +_ }.mkString("\n")
