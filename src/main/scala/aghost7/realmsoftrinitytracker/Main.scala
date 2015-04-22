@@ -14,7 +14,7 @@ import globals._
 
 
 object Main extends App {
-	
+
 	/** Goes through all errors and runs them through the updated deciferLine 
 	 *  method. Deletes the error entry and inserts the corrected snapshot.
 	 */
@@ -41,7 +41,7 @@ object Main extends App {
 		}
 	}
 	
-	Loadscreen.animate { 
+	Loadscreen.animate {
 		Tracker.thread.start
 		// Since its lazily initialized...
 		ControlBar 

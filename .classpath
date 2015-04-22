@@ -1,16 +1,23 @@
 <classpath>
-  <classpathentry output="target\scala-2.11\classes" kind="src" path="src\main\scala"/>
-  <classpathentry output="target\scala-2.11\classes" kind="src" path="src\main\java"/>
-  <classpathentry output="target\scala-2.11\test-classes" kind="src" path="src\test\scala"/>
-  <classpathentry output="target\scala-2.11\test-classes" kind="src" path="src\test\java"/>
-  <classpathentry kind="lib" path=".\lib\bebop-event_2.11-0.1.jar"/>
-  <classpathentry kind="lib" path=".\lib\scriptly_2.11-0.1.jar"/>
+  <classpathentry kind="src" path="src/main/scala"/>
+  <classpathentry kind="src" path="src/main/java"/>
+  <classpathentry kind="src" path="src/main/resources"/>
+  <classpathentry kind="src" path="src/test/scala"/>
+  <classpathentry kind="src" path="src/test/java"/>
+  <classpathentry kind="src" path="src/test/resources"/>
+  <classpathentry kind="lib" path="./lib/scriptly_2.11-0.1.jar"/>
+  <classpathentry kind="lib" path="./lib/bebop-event_2.11-0.1.jar"/>
   <classpathentry kind="con" path="org.scala-ide.sdt.launching.SCALA_CONTAINER"/>
-  <classpathentry kind="lib" path="C:\Users\Jonathan\.ivy2\cache\postgresql\postgresql\jars\postgresql-9.1-901.jdbc4.jar"/>
-  <classpathentry kind="lib" path="C:\Users\Jonathan\.ivy2\cache\com.typesafe.play\anorm_2.11\jars\anorm_2.11-2.3.6.jar"/>
-  <classpathentry kind="lib" path="C:\Users\Jonathan\.ivy2\cache\org.scala-lang.modules\scala-parser-combinators_2.11\bundles\scala-parser-combinators_2.11-1.0.1.jar"/>
-  <classpathentry kind="lib" path="C:\Users\Jonathan\.ivy2\cache\org.scalatest\scalatest_2.11\bundles\scalatest_2.11-2.2.1.jar"/>
-  <classpathentry kind="lib" path="C:\Users\Jonathan\.ivy2\cache\org.scala-lang.modules\scala-xml_2.11\bundles\scala-xml_2.11-1.0.2.jar"/>
+  <classpathentry kind="lib" path="/home/jonathan/.ivy2/cache/postgresql/postgresql/jars/postgresql-9.1-901.jdbc4.jar"/>
+  <classpathentry kind="lib" path="/home/jonathan/.ivy2/cache/com.typesafe.play/anorm_2.11/jars/anorm_2.11-2.4.0-M3.jar"/>
+  <classpathentry kind="lib" path="/home/jonathan/.ivy2/cache/com.typesafe.play/anorm-tokenizer_2.11/jars/anorm-tokenizer_2.11-2.4.0-M3.jar"/>
+  <classpathentry kind="lib" path="/home/jonathan/.ivy2/cache/com.jsuereth/scala-arm_2.11/jars/scala-arm_2.11-1.4.jar"/>
+  <classpathentry kind="lib" path="/home/jonathan/.ivy2/cache/org.scala-lang.plugins/scala-continuations-library_2.11/bundles/scala-continuations-library_2.11-1.0.1.jar"/>
+  <classpathentry kind="lib" path="/home/jonathan/.ivy2/cache/joda-time/joda-time/jars/joda-time-2.6.jar"/>
+  <classpathentry kind="lib" path="/home/jonathan/.ivy2/cache/org.joda/joda-convert/jars/joda-convert-1.7.jar"/>
+  <classpathentry kind="lib" path="/home/jonathan/.ivy2/cache/org.scala-lang.modules/scala-parser-combinators_2.11/bundles/scala-parser-combinators_2.11-1.0.1.jar"/>
+  <classpathentry kind="lib" path="/home/jonathan/.ivy2/cache/org.scalatest/scalatest_2.11/bundles/scalatest_2.11-2.2.1.jar"/>
+  <classpathentry kind="lib" path="/home/jonathan/.ivy2/cache/org.scala-lang.modules/scala-xml_2.11/bundles/scala-xml_2.11-1.0.2.jar"/>
   <classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
   <classpathentry kind="output" path="bin"/>
 </classpath>

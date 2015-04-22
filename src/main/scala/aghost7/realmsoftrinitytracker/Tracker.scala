@@ -1,6 +1,6 @@
 package aghost7.realmsoftrinitytracker
 
-import scala.io.Source
+import scala.io.{Codec, Source}
 import anorm._
 import java.sql.{Connection, Timestamp}
 
@@ -25,7 +25,7 @@ object Tracker extends Runnable {
 	
 	/** Fetches the lines needed for processing and strips out the html tags. */
 	def getLines: Iterator[String] = Source
-		.fromURL("http://www.realmsoftrinity.com/PlayersOnline.aspx")
+		.fromURL("http://www.realmsoftrinity.com/PlayersOnline.aspx")(Codec.UTF8)
 		.getLines
 		.dropWhile { !_.contains("<h4>Player, Character, Level, Location</h4></br></br>") }
 		.drop(1)
@@ -96,6 +96,7 @@ object Tracker extends Runnable {
 	
 	/** This is the loop responsible for fetching the data every 20 minutes. */
 	def mainLoop(lastSnapshots: Traversable[Snapshot]): Unit = {
+
 		try {
 			val (snapshots, errors) = getLines
 					.map(deciferLine)
@@ -106,7 +107,6 @@ object Tracker extends Runnable {
 								case Right(err) => (snps, err :: errs)
 							}
 					}
-			
 			sqlCon { implicit con =>
 				Snapshot.insertBatch(snapshots)
 				Error.insertBatch(errors)

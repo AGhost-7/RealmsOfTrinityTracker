@@ -47,3 +47,5 @@ project/target
 exceptions.txt
 .project
 .classpath
+.idea/*
+.settings/*

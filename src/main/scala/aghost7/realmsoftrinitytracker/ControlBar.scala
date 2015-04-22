@@ -6,12 +6,14 @@ import javax.swing._
 
 import java.awt.SystemTray
 import aghost7.bebop.event.implicits._
-
+import sys.process._
 import globals._
+
 
 object ControlBar {
 	
 	var notifyEnabled = true
+
 	lazy val tray = SystemTray.getSystemTray
 	
 	lazy val notif = new Checkbox("Notify", true)
@@ -21,6 +23,20 @@ object ControlBar {
 		add(notif)
 		addSeparator()
 		add(close)
+	}
+
+	private lazy val _notify: (String, String) => Unit = {
+		if(System.getProperty("os.name") == "Linux"
+				&& "which notify-send".!! != ""){
+			(title, body) =>
+				Seq("notify-send", title, body) !
+		} else if(SystemTray.isSupported()) {
+			(title, body) =>
+				trayIcon.displayMessage(title, body, TrayIcon.MessageType.INFO)
+		} else {
+			(title, body) =>
+				Unit
+		}
 	}
 	
 	lazy val img = 
@@ -43,14 +59,13 @@ object ControlBar {
 		writer { put =>
 			put("---System tray control not supported---")
 		}
-		System.exit(1)
 	}
-	
+
 	def notify(title: String, message: String): Unit = {
 		SwingUtilities.invokeLater(new Runnable {
 			def run = 
 				if(notifyEnabled){
-					trayIcon.displayMessage(title, message, TrayIcon.MessageType.INFO)
+					_notify(title, message)
 				}
 		})
 	}

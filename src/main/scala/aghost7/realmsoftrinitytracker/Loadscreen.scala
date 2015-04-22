@@ -8,19 +8,24 @@ import javax.swing.{
 	ImageIcon
 }
 
+import java.awt.{GraphicsEnvironment, GraphicsDevice}
+
 class Loadscreen extends JFrame {
-		
+	setVisible(true)
 	setUndecorated(true)
 	val pMain = getContentPane.asInstanceOf[JPanel]
 	val img = new ImageIcon(getClass.getResource("/loadscreen.png"))
 	pMain.setOpaque(true)
 	
 	pMain.add(new JLabel(img))
-	setOpacity(0.5f)
+
+	super.setOpacity(0.5f)
 	pack()
 	setLocationRelativeTo(null)
 	setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE)
-	setVisible(true)
+	//setUndecorated(true)
+
+
 	
 	def animate(callback: => Unit): Unit = {
 		import aghost7.bebop.event.BConcurrent._
@@ -42,9 +47,19 @@ class Loadscreen extends JFrame {
 }
 
 object Loadscreen {
-	val s = 'foo
 	def animate(callback: => Unit): Unit = {
-		val ld = new Loadscreen
-		ld.animate(callback)
+		val ge = GraphicsEnvironment.getLocalGraphicsEnvironment
+		val dev = ge.getDefaultScreenDevice
+
+		if(dev.isWindowTranslucencySupported(
+				GraphicsDevice.WindowTranslucency.TRANSLUCENT)){
+			val ld = new Loadscreen
+			ld.animate(callback)
+		} else {
+			// fallback to notification is you can't get the load screen working.
+			ControlBar.notify("Realms of Trinity Tracker", "Tracker is now active.")
+			callback
+		}
+
 	}
 }

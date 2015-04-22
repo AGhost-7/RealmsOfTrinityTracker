@@ -10,6 +10,13 @@ libraryDependencies ++= Seq(
 	"org.scalatest" % "scalatest_2.11" % "2.2.1" % "test"
 )
 
+scalacOptions ++= Seq(
+    "-target:jvm-1.7",
+    "-unchecked",
+    "-deprecation"
+)
+    
+
 assemblyJarName in assembly := "RealmsOfTrinityTracker.jar"
 
 mainClass := Some("aghost7.realmsoftrinitytracker.Main")
