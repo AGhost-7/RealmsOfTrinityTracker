@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Exec=java -jar /usr/local/bin/RealmsOfTrinityTracker.jar > /dev/null 2>&1 &
+Hidden=false
+NoDisplay=false
+X-GNOME-Autostart-enabled=true
+Name[en_CA]=RoTTracker
+Name=RoTTracker
+Comment[en_CA]=
+Comment=
+
